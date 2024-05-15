@@ -40,8 +40,12 @@ if("${MONO_PATH}" STREQUAL "")
   message(FATAL_ERROR "You must specify mono-xcompiler Mono folder by setting MONO_PATH")
 endif()
 
-if(USE_CUSTOM_LIBC)
+if (USE_CUSTOM_LIBC)
+  set(SCELIBC_LIBRARY ${CMAKE_BINARY_DIR}/lib/SceLibcMonoBridge/stubs/libSceLibcMonoBridge_stub.a)
   add_compile_definitions(USE_CUSTOM_LIBC)
+  add_subdirectory(lib/SceLibcMonoBridge)
+else()
+  set(SCELIBC_LIBRARY SceLibc_stub)
 endif()
 
 include_directories(
@@ -53,7 +57,6 @@ include_directories(
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -marm -mtune=cortex-a9 -mfpu=neon -Wno-incompatible-pointer-types -Wno-stringop-overflow -Wl,-q -O3 -Wall")
 
 add_subdirectory(headers)
-add_subdirectory(lib/SceLibcMonoBridge)
 add_subdirectory(VMLCoreAssemblies)
 add_subdirectory(VitaMonoLoader)
 add_subdirectory(VMLVita2D)
