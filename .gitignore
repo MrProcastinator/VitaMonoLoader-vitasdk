@@ -22,6 +22,7 @@
 *.lo
 
 # Shared objects (inc. Windows DLLs)
+*.a
 *.dll
 *.so
 *.so.*
@@ -60,3 +61,4 @@ CONTENTS
 
 # CMakeLists folders
 *build*
+stubs/
