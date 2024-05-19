@@ -8,7 +8,7 @@ import subprocess
 import yaml
 
 def ishexstring(str):
-    return re.search(r'[a-fA-F0-9]+', str[2:])
+    return re.search(r'^[a-fA-F0-9]+$', str)
 
 def hex_representer(dumper, data):
     return dumper.represent_int(hex(data).upper().replace('X', 'x'))
