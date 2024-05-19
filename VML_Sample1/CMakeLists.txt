@@ -22,14 +22,14 @@ add_executable(${PROJECT_NAME}
   Sample1.dll.s
 )
 
-add_dependencies(${PROJECT_NAME} headers SceLibcMonoBridge)
+add_dependencies(${PROJECT_NAME} headers SceLibcMonoBridge ${MONO_STUBS_DEPENDENCIES})
 
 target_link_libraries(${PROJECT_NAME} VitaMonoLoader VMLCoreAssemblies)
 target_link_libraries(${PROJECT_NAME} c m z)
 target_link_libraries(${PROJECT_NAME} mathneon)
 target_link_libraries(${PROJECT_NAME} SceLibDbg_stub SceLibKernel_stub SceAppMgr_stub SceAppUtil_stub SceCommonDialog_stub SceGxm_stub SceDisplay_stub SceSysmodule_stub)
 
-target_link_libraries(${PROJECT_NAME} mono-vita_stub PTHREAD_PRX_stub SUPRXManager_stub_weak)
+target_link_libraries(${PROJECT_NAME} ${MONO_VITA_STUBS} ${PTHREAD_STUBS} ${SUPRXMANAGER_STUBS})
 target_link_libraries(${PROJECT_NAME} SceSysmem_stub SceIofilemgr_stub SceRtc_stub SceAppUtil_stub SceNet_stub SceKernelThreadMgr_stub ${SCELIBC_LIBRARY} SceFios2_stub SceLibKernel_stub)
 target_link_libraries(${PROJECT_NAME} vitashark SceShaccCgExt)
 target_link_libraries(${PROJECT_NAME} taihen_stub SceShaccCg_stub SceKernelDmacMgr_stub)

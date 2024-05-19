@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.2)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -23,6 +23,7 @@ set(MONO_PATH "$ENV{MONO_PATH}" CACHE STRING "Unity Support for Vita Mono librar
 set(MONO_PATH_WIN32 "${MONO_PATH}" CACHE STRING "Unity Support for Vita Mono library path (Windows format)")
 set(USE_MONO_COMPILER OFF CACHE BOOL "Use mono compiler to generate AOT files, WSL only")
 set(USE_CUSTOM_LIBC ON CACHE BOOL "Use sce_module libraries from Unity Support for Vita")
+set(USE_RE_TOOLS ON CACHE BOOL "Generate vitasdk format stubs automatically using RE Tools")
 
 # Vita library names (for Vita3K)
 set(VITA_GL_LIB vitaGL CACHE STRING "Name of OpenGL static library")
@@ -55,6 +56,23 @@ include_directories(
 )
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -marm -mtune=cortex-a9 -mfpu=neon -Wno-incompatible-pointer-types -Wno-stringop-overflow -Wl,-q -O3 -Wall")
+
+if(USE_RE_TOOLS)
+  include(RETools)
+  add_subdirectory(lib/mono-vita)
+  add_subdirectory(lib/pthread)
+  add_subdirectory(lib/SUPRXManager)
+  set(MONO_VITA_STUBS ${CMAKE_BINARY_DIR}/lib/mono-vita/stubs/libMONO_stub.a)
+  set(PTHREAD_STUBS ${CMAKE_BINARY_DIR}/lib/pthread/stubs/libPTHREAD_PRX_stub.a)
+  set(SUPRXMANAGER_STUBS ${CMAKE_BINARY_DIR}/lib/SUPRXManager/stubs/libSUPRXManager_stub_weak.a)
+  set(MONO_STUBS_DEPENDENCIES mono-vita_stubs pthread_stubs SUPRXManager_stubs)
+else()
+  add_subdirectory(lib/prebuilt)
+  set(MONO_VITA_STUBS ${CMAKE_BINARY_DIR}/lib/prebuilt/stubs/libMONO_stub.a)
+  set(PTHREAD_STUBS ${CMAKE_BINARY_DIR}/lib/prebuilt/stubs/libPTHREAD_PRX_stub.a)
+  set(SUPRXMANAGER_STUBS ${CMAKE_BINARY_DIR}/lib/prebuilt/stubs/libSUPRXManager_stub_weak.a)
+  set(MONO_STUBS_DEPENDENCIES mono_stubs)
+endif()
 
 add_subdirectory(headers)
 add_subdirectory(VMLCoreAssemblies)
