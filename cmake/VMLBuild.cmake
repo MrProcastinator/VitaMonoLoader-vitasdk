@@ -6,7 +6,6 @@ function(compile_mono_single_assembly_aot)
 
     cmake_parse_arguments(MONO "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    # Convert the list of references to a string with semicolon-separated values
     set(REFERENCE_ARGS "")
     if(MONO_REFERENCES)
       foreach(REF ${MONO_REFERENCES})
@@ -58,23 +57,43 @@ endfunction()
 
 function(compile_mono_external_dll_aot)
     set(oneValueArgs ASSEMBLY)
+    set(multiValueArgs REFERENCES)
 
-    cmake_parse_arguments(MONO "" "${oneValueArgs}" "" ${ARGN})
+    cmake_parse_arguments(MONO "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    set(MONO_WIN32_PATH ${CMAKE_BINARY_DIR})
+
+    set(REFERENCE_ARGS "")
+    if(MONO_REFERENCES)
+      foreach(REF ${MONO_REFERENCES})
+        list(APPEND REFERENCE_ARGS "${CMAKE_BINARY_DIR}/${REF}")
+      endforeach()
+    endif()
 
     add_custom_command(
-        OUTPUT "${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}.s"
-        COMMAND export "MONO_PATH=${MONO_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static "'${MONO_PATH_WIN32}\\${MONO_ASSEMBLY}'"
+        OUTPUT ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}"
+            ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}
         DEPENDS "${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Installing external assembly ${MONO_ASSEMBLY}"
+    )
+
+    add_custom_command(
+        OUTPUT ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.s
+        COMMAND export "MONO_PATH=${MONO_WIN32_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static ${MONO_ASSEMBLY}
+        DEPENDS ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY} ${REFERENCE_ARGS}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating AOT file for ${MONO_ASSEMBLY}"
     )
 
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${MONO_ASSEMBLY}.s
         COMMAND ${CMAKE_COMMAND} -E copy
-            ${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}.s
+            ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.s
             ${CMAKE_CURRENT_BINARY_DIR}/${MONO_ASSEMBLY}.s
-        DEPENDS "${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}.s"
+        DEPENDS ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.s
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Copying AOT file for ${MONO_ASSEMBLY}"
     )
