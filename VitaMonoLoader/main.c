@@ -93,6 +93,8 @@ MonoDomain *initPSP2Stage2()
 		currThread = mono_thread_current();
 		mono_thread_set_main(currThread);
 		mono_runtime_unhandled_exception_policy_set(MONO_UNHANDLED_POLICY_LEGACY);
+		SCE_DBG_LOG_INFO("Applying patches...");
+		VMLCoreAssembliesApplyPatches();
 	}
 
 	return domain;

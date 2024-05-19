@@ -9,6 +9,16 @@ include_directories(
   ../headers/VML # VML includes
 )
 
+# Patches for mscorlib internal calls
+set (VML_MONO_PATCHES
+  "patches/patches.c"
+  "patches/patches.h"
+  "patches/mono/metadata/file-io.c"
+  "patches/mono/metadata/file-io.h"
+  "patches/mono/metadata/icall.c"
+  "patches/mono/metadata/icall.h"
+)
+
 if (USE_MONO_COMPILER)
   add_custom_target(MonoCoreLibraries
     DEPENDS
@@ -50,6 +60,7 @@ endif ()
 
 add_library(${PROJECT_NAME} STATIC
   main.c
+  ${VML_MONO_PATCHES}
   Mono.Posix.dll.s
   Mono.Security.dll.s
   System.Configuration.dll.s

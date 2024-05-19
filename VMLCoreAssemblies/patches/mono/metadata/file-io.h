@@ -1,0 +1,6 @@
+#ifndef _VML_CORE_ASSEMBLIES_PATCHES_FILEIO_H_
+#define _VML_CORE_ASSEMBLIES_PATCHES_FILEIO_H_
+
+void VMLFileIOApplyPatches();
+
+#endif

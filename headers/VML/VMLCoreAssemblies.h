@@ -2,5 +2,6 @@
 #define _VML_CORE_ASSEMBLIES_H_
 
 void VMLCoreAssembliesRegister();
+void VMLCoreAssembliesApplyPatches();
 
 #endif
