@@ -31,7 +31,9 @@ function(compile_mono_single_assembly_aot)
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${MONO_CODE_FILE}.dll.s
         COMMAND export "MONO_PATH=${MONO_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static ${MONO_CODE_FILE}.dll
-        COMMAND mv ${CMAKE_BINARY_DIR}/${MONO_CODE_FILE}.dll.s "${CMAKE_CURRENT_BINARY_DIR}/${MONO_CODE_FILE}.dll.s"
+        COMMAND ${CMAKE_COMMAND} -E rename
+            ${CMAKE_BINARY_DIR}/${MONO_CODE_FILE}.dll.s
+            "${CMAKE_CURRENT_BINARY_DIR}/${MONO_CODE_FILE}.dll.s"
         DEPENDS ${CMAKE_BINARY_DIR}/${MONO_CODE_FILE}.dll
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating AOT file for ${MONO_CODE_FILE}.dll"
