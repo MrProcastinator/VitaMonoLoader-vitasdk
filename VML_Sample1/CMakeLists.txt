@@ -52,3 +52,13 @@ NAME ${VITA_APP_NAME}
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/Sample1/bg.png sce_sys/livearea/contents/bg.png
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/template.xml sce_sys/livearea/contents/template.xml
 )
+
+add_custom_target(VMLSample1_send_v3k
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_BINARY_DIR}/Sample1.dll
+    ${VITA3K_PATH}/ux0/data/VML/Sample1.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_BINARY_DIR}/sample1-eboot.bin
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/eboot.bin
+  DEPENDS ${VITA_VPKNAME}.vpk-vpk ${CMAKE_BINARY_DIR}/Sample1.dll
+)
