@@ -17,23 +17,12 @@ project(VitaMonoLoader)
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 # Must be provided when running
-set(SFV_FOLDER "" CACHE STRING "Unity Support for Vita installation folder")
-set(VML_FOLDER "" CACHE STRING "Vita Mono Loader installation folder")
-set(MONO_PATH "$ENV{MONO_PATH}" CACHE STRING "Unity Support for Vita Mono library path")
 set(USE_MONO_COMPILER OFF CACHE BOOL "Use mono compiler to generate AOT files, WSL only")
 set(USE_CUSTOM_LIBC ON CACHE BOOL "Use sce_module libraries from Unity Support for Vita")
 set(USE_RE_TOOLS ON CACHE BOOL "Generate vitasdk format stubs automatically using RE Tools")
 
-# Vita library names (for Vita3K)
-set(VITA_GL_LIB vitaGL CACHE STRING "Name of OpenGL static library")
-set(VITA_VITASHARK_LIB vitashark CACHE STRING "Name of vitashark static library")
-
 if("${SFV_FOLDER}" STREQUAL "")
   message(FATAL_ERROR "You must specify Unity Support for Vita installation folder by setting SFV_FOLDER")
-endif()
-
-if("${VML_FOLDER}" STREQUAL "")
-  message(FATAL_ERROR "You must specify Vita Mono Loader installation folder by setting VML_FOLDER")
 endif()
 
 if("${MONO_PATH}" STREQUAL "")
