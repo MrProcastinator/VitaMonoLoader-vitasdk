@@ -81,7 +81,9 @@ function(compile_mono_assembly_aot)
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${MONO_ASSEMBLY}.dll.s
         COMMAND export "MONO_PATH=${MONO_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static ${MONO_ASSEMBLY}.dll
-        COMMAND mv ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.dll.s "${CMAKE_CURRENT_BINARY_DIR}/${MONO_ASSEMBLY}.dll.s"
+        COMMAND ${CMAKE_COMMAND} -E rename 
+          ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.dll.s 
+          "${CMAKE_CURRENT_BINARY_DIR}/${MONO_ASSEMBLY}.dll.s"
         DEPENDS ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.dll
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating AOT file for ${MONO_ASSEMBLY}.dll"
@@ -98,6 +100,9 @@ function(compile_mono_assembly_aot)
             COMMENT "Generating config file for ${MONO_ASSEMBLY}.dll"
         )
     endif()
+
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_ASSEMBLY}.dll.s")
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_ASSEMBLY}.dll")
 endfunction()
 
 function(compile_mono_dll_aot)
@@ -114,30 +119,58 @@ function(compile_mono_dll_aot)
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating AOT file for ${DLL_BASENAME}"
     )
+
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_DLL_FILE}.s")
 endfunction()
 
 function(compile_mono_external_dll_aot)
-    set(oneValueArgs ASSEMBLY)
+    set(oneValueArgs ASSEMBLY TARGET LIBPATH)
+    set(multiValueArgs REFERENCES)
 
-    cmake_parse_arguments(MONO "" "${oneValueArgs}" "" ${ARGN})
+    cmake_parse_arguments(MONO "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    
+    set(DLL_PATH "${SFV_FOLDER}/Tools/MonoPSP2")
+    if(MONO_LIBPATH)
+      set(DLL_PATH "${MONO_LIBPATH}")
+    endif()
+
+    set(REFERENCE_ARGS "")
+    if(MONO_REFERENCES)
+      foreach(REF ${MONO_REFERENCES})
+        list(APPEND REFERENCE_ARGS ${REF})
+      endforeach()
+    endif()
 
     add_custom_command(
-        OUTPUT "${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}.s"
-        COMMAND export "MONO_PATH=${MONO_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static "'${MONO_PATH_WIN32}\\${MONO_ASSEMBLY}'"
-        DEPENDS "${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Generating AOT file for ${MONO_ASSEMBLY}"
+      OUTPUT ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}
+      COMMAND ${CMAKE_COMMAND} -E copy
+            ${DLL_PATH}/${MONO_ASSEMBLY}
+            ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}
+      DEPENDS "${DLL_PATH}/${MONO_ASSEMBLY}"
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMENT "Importing assembly ${MONO_ASSEMBLY}"
+    )
+  
+    add_custom_command(
+      OUTPUT ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.s
+      COMMAND export "MONO_PATH=${MONO_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static ${MONO_ASSEMBLY}
+      DEPENDS ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY} ${REFERENCE_ARGS}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMENT "Generating AOT file for ${MONO_ASSEMBLY}"
     )
 
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${MONO_ASSEMBLY}.s
         COMMAND ${CMAKE_COMMAND} -E copy
-            ${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}.s
+            ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.s
             ${CMAKE_CURRENT_BINARY_DIR}/${MONO_ASSEMBLY}.s
-        DEPENDS "${SFV_FOLDER}/Tools/MonoPSP2/${MONO_ASSEMBLY}.s"
+        DEPENDS ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.s
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Copying AOT file for ${MONO_ASSEMBLY}"
     )
+
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_ASSEMBLY}.s")
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_ASSEMBLY}")
 endfunction()
 
 function(compile_mono_single_assembly_aot)
@@ -178,4 +211,6 @@ function(compile_mono_external_import)
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Importing assembly dependency ${MONO_ASSEMBLY}"
     )
+
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADDITIONAL_MAKE_CLEAN_FILES};${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}")
 endfunction()
