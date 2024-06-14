@@ -20,7 +20,7 @@ set(MONO_LIB_VML_PATH "lib" CACHE STRING "Mono VML static library path")
 # VMLBuild script Version
 set(VMLBUILD_VERSION_MAX 0)
 set(VMLBUILD_VERSION_MIN 1)
-set(VMLBUILD_VERSION_PATCH 0)
+set(VMLBUILD_VERSION_PATCH 1)
 
 message("Using VMLBuild version ${VMLBUILD_VERSION_MAX}.${VMLBUILD_VERSION_MIN}.${VMLBUILD_VERSION_PATCH}")
 message("With Unity Support for Vita located at: '${SFV_FOLDER}'")
