@@ -1,35 +1,247 @@
-# VitaMonoLoader
-Standalone mono loader for PS Vita
+# VitaMonoLoader for vitasdk
+Standalone mono loader for PS Vita, compatible with vitasdk, based on [this project](https://github.com/GrapheneCt/VitaMonoLoader).
 
-WIP
+## What's VitaMonoLoader?
 
-# Usage
-Only Windows is supported for host. VDS (SCE SDK) and vitasdk are supported for PSP2.
-### Installation (host side)
-1. Download and install latest [Mono for Windows](https://www.mono-project.com/download/stable/)
-2. Download ```UnitySetup-Playstation-Vita-Support-for-Editor-2018.3.0a2.exe```, open it as archive and extract ```$INSTDIR$_59_``` folder
-3. Add following to your PATH enviroment variable:
-- ```<MonoInstallPath>/bin``` (where mono.exe is located)
-- ```<UnitySupportExtractPath>/Tools``` (where mono-xcompiler.exe is located)
-4. Add Mono ```headers``` from this repository to your SDK installation
-### Installation (PSP2 side)
+This library allows any developer to use Mono for vita implementation to create .NET programs and load .NET assemblies in a native application for the PSVita. For core libraries, only NET 2.0 features are supported.
+
+## Requirements
+
+In order to use this library, you must have:
+- A copy of any UnitySetup-Playstation-Vita-Support-for-Editor installer, supplied by Unity
+- [Mono 2.11.4 for Windows](https://download.mono-project.com/archive/2.11.4/windows-installer/index.html)
+- [Latest Mono release](https://www.mono-project.com/download/stable/) either for Windows or Linux
+- Access to a Windows machine to run the Unity mono compiler
+
+In order to do the full compilation chain, either use an only Windows setup, or a Windows+WSL setup (recommended)
+
+## Setup guide
+
+### Host system side
+1. Either, extract the contents of the ```UnitySetup-Playstation-Vita-Support-for-Editor``` installer (using any zip extractor and searching for a ```$INSTDIR$_59_``` folder), or install in Windows in any path.
+2. Enter your Mono 2.11.4 installation folder and copy the lib\mono\2.0 folder as lib\mono\2.0-xcompiler
+3. Open `mscorlib.dll` in 2.0-xcompiler with dnSpy
+4. Find the class System.Environment
+5. Change the value of mono_corlib_version from 105 to 89
+6. When setting up your CMake folder, take into account the folder where the Unity Support files are stored (for SFV_FOLDER), and the 2.0-xcompiler folder (for MCS_PATH) (for more reference see [Build configuration](#build-configuration))
+
+### PSVita system side
 1. Download and install [CapUnlocker](https://github.com/GrapheneCt/CapUnlocker) plugin
-1. Copy ```Media``` folder from extracted Unity support installer to ```app0:```
-2. Copy ```machine.config``` from extracted Unity support installer to ```app0:Media/Managed/mono/2.0```
-3. Copy modules from current release to ```app0:Media/Modules```
-### Compiling C# code
+2. Copy the following files from the folder `Data\Modules` inside the Unity Support for Vita folder to `ur0:data/VML`:
+    
+    - mono-vita.suprx
+    - pthread.suprx
+    - SUPRXManager.suprx
+   
+3. Copy the following files from the folder `sce_module` inside the Unity Support for Vita folder to `ur0:data/VML` (not needed to run on Vita3K):
+    
+    - libc.suprx
+    - libfios2.suprx
+
+## How to use
+
+### Compile C# code
+#### Manually
 1. Compile your C# code to managed .dll by executing: ```mcs -sdk:2 -target:library -out:<MyDllName>.dll <MySrcName>.cs```
 2. Compile your managed .dll to AOT assembly .s by executing: ```mono-xcompiler.exe --aot=full,asmonly,nodebug,static <MyDllName>.dll```
 3. Add AOT assembly .s files as compile targets in your Vita app project
-4. __Your PSP2 application must be compiled in ARM mode:__
-- For VDS (SCE SDK): use -Xthumb=0 (can also be set in project settings)
-- For vitasdk: compile with -marm
-### Using AOT assembly on PSP2
-1. Copy managed .dll file to ```app0:Media/Managed```
-2. Add AOT assembly .s file as compilation target in your PSP2 self project
-3. To load AOT assembly on PSP2, call:
+4. __Your PSVita application must be compiled in ARM mode:__ (compile with -marm)
+
+#### Using CMake
+
+You can use the VMLBuild.cmake plugin provided in this project to compile directly, using the following supported functions:
+
+__For step 1__
+
+- `compile_mono_single_assembly_aot(ASSEMBLY CODE_FILE)`: generates an assembly from a single code file.
+
+| **CMake Parameter**        | **Description**
+|:-------------------|:------------------------------------------
+|`ASSEMBLY`         | The name of the assembly to compile (including .dll)
+|`CODE_FILE` | Path to a .cs file to compile
+
+- `compile_mono_assembly_aot(ASSEMBLY CONFIG SOURCES REFERENCES FLAGS RESOURCES DEFINES)`: compiles an assembly from multiple source files and other advanced configurations
+
+| **CMake Parameter**        | **Description**
+|:-------------------|:------------------------------------------
+|`ASSEMBLY`         | The name of the assembly to compile (without .dll)
+|`CONFIG` | Path to the .dll.config file if needed
+|`SOURCES` | List of .cs files to compile for mcs
+|`REFERENCES` | List of dependency assemblies names for mcs (-r)
+|`FLAGS` | Aditional flags to pass to mcs (without initial "-")
+|`RESOURCES` | List of file resources to pack into the module for mcs (-resource)
+|`DEFINES` | List of additional mono compiler defines for mcs (-define)
+
+__For step 2__
+
+- `compile_mono_dll_aot(DLL_FILE)`: Generate AOT assembly files for an specific mono assembly
+
+| **CMake Parameter**        | **Description**
+|:-------------------|:------------------------------------------
+|`DLL_FILE`         | Name of the dll file to generate AOT file for
+
+NOTE: `compile_mono_assembly_aot` already generates AOT files when executed. Use `compile_mono_dll_aot` only to generate files for __assemblies generated by Unity Support for Vita__ (e.g.: System.Text.dll, etc)
+
+- `compile_mono_external_dll_aot(ASSEMBLY TARGET LIBPATH REFERENCES)`: shorcut to generate AOT files for libraries inside the __Unity Support for Vita managed folder__
+
+| **CMake Parameter**        | **Description**
+|:-------------------|:------------------------------------------
+|`ASSEMBLY`         | The name of the assembly to compile (including .dll)
+|`LIBPATH`         | Path to Mono library if using custom installation
+|`REFERENCES`         | List of dependency assemblies names
+
+- `compile_mono_external_import(ASSEMBLY TARGET LIBPATH)`: includes an external library to the dependency chain, provided it has already been compiled to AOT and has an importable static library
+
+| **CMake Parameter**        | **Description**
+|:-------------------|:------------------------------------------
+|`ASSEMBLY`         | The name of the assembly to compile (including .dll)
+|`TARGET`         | Name of the CMake target to bind this file (needed for CMake dependency management)
+|`LIBPATH`         | Path to Mono library if using custom installation
+
+NOTE: for all calls, .dll and .dll.s files are generated and copied into `${CMAKE_BINARY_BIN}`, in order to reference all of them with mcs (may generate duplicates so be careful with space usage)
+
+Example of the whole circuit for `Example.dll`, using `System.Text.dll` and `Newtonsoft.Json.dll`:
+
+```csharp
+compile_mono_assembly_aot(
+  SOURCES Program.cs Example.cs
+  ASSEMBLY Example // Generates Example.dll assembly
+  REFERENCES System.Text.dll
+  DEFINES ARM_ARCH
+)
+
+// From mono core library
+compile_mono_external_dll_aot(
+  ASSEMBLY System.Text.dll
+  REFERENCES mscorlib.dll
+)
+
+add_custom_target(MonoDeps
+    DEPENDS
+      ${CMAKE_CURRENT_BINARY_DIR}/System.Text.dll.s
+)
+
+// From external source
+add_custom_target(ExternalDeps)
+
+compile_mono_external_import(
+    ASSEMBLY NewtonSoft.Json.dll
+    TARGET ExternalDeps
+)
+
+add_executable(Example
+  main.c
+  System.Text.dll.s
+  Example.dll.s
+)
+
+add_dependencies(Example MonoDeps)
+add_dependencies(Example ExternalDeps)
+
+target_link_libraries(Example VMLNewtonSoftJson)
+```
+
+
+### Using AOT assembly on PSVita
+
+#### Using dependency assemblies
+
+1. Copy managed .dll file to ```app0:VML```
+2. Add AOT assembly .s file as dependencies for your project (if using VMLBuild.cmake add the .s file names to `create_executable`)
+3. To load AOT assembly on PSVita, call:
+
 ```
 extern void** mono_aot_module_<MyDllName>_info;
 
 VMLRegisterAssembly(mono_aot_module_<MyDllName>_info);
 ```
+For example:
+
+```
+extern void** mono_aot_module_AwesomeShmupGame_info;
+
+VMLRegisterAssembly(mono_aot_module_AwesomeShmupGame_info);
+```
+NOTE: non alphanumeric characters inside an assembly name (like '.') are translated as '_' (System.Xml => System_Xml)
+
+#### Binding native calls
+
+If your C# module needs to access native PSVita functionality, you can do it using the `[MethodImpl(MethodImplOptions.InternalCall)]` feature in the C# code, and `mono_add_internal_call` in the native code (for more information, read [this info](https://www.mono-project.com/docs/advanced/pinvoke/))
+
+For example:
+
+__In Example.cs__
+
+```csharp
+public class Example
+{
+    [MethodImpl(MethodImplOptions.InternalCall)]
+    public static extern int Sum(int a, int b);
+}
+```
+
+__In Example.c__
+
+```c
+#include <vitasdk.h>
+
+#include <stdint.h>
+
+#include <mono/metadata/appdomain.h>
+#include <mono/mini/jit.h>
+
+int32_t sum(int32_t a, int32_t b)
+{
+    return a + b;
+}
+
+extern void** mono_aot_module_Example_info;
+
+void VMLExampleRegister()
+{
+    mono_aot_register_module(mono_aot_module_Example_info);
+
+    mono_add_internal_call("Example::Sum", example);
+}
+```
+
+__In main.c__
+
+```c
+void rootEntry()
+{
+    VMLExampleRegister();
+
+	int ret = VMLRunMain(ASSEMBLIES_DLL_FILE, mono_aot_module_Game_info);
+}
+
+int main()
+{
+    // ...
+    ret = VMLInitialize(rootEntry, &optParam);
+    // ...
+}
+```
+
+## Examples
+
+This repository contains some examples to help you get started with VitaMonoLoader use:
+- VML_Sample1: Simple return example
+- VML_Sample2: example of Vita2D bindings usage on mono
+
+## Build configuration
+
+This template provides a set of CMake variables to allow build customization according to your development environment.
+
+### VitaMonoLoader specific variables
+
+| **CMake Variable**        | **Description**
+|:-------------------|:------------------------------------------
+|`SFV_FOLDER`         | Unity Support for Vita installation folder (mandatory)
+|`MONO_PATH` | Unity Support for Vita Mono library path (mandatory, should be inside Tools/MonoPSP2)
+|`MONO_LIB_DLL_PATH` | Path to the vitasdk include folder containing VML initialization headers (default: lib/mono)
+|`MONO_LIB_VML_PATH` | Path to the vitasdk lib folder containing VML binding libraries (default: lib)
+
+## TODO
+
+- Create a wiki to document everything needed to fully understand VitaMonoLoader
