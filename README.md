@@ -27,6 +27,11 @@ In order to do the full compilation chain, either use an only Windows setup, or 
 5. Change the value of mono_corlib_version from 105 to 89
 6. Put vita-unmake-fself.exe and nids-extract.exe in a folder accesible through your PATH variable
 7. When setting up your CMake folder, take into account the folder where the Unity Support files are stored (for SFV_FOLDER), and the 2.0-xcompiler folder (for MCS_PATH) (for more reference see [Build configuration](#build-configuration))
+8. When cloning the project, execute the following git commands after:
+   ```sh
+   git submodule init
+   git submodule update --init --recursive
+   ```
 
 ### PSVita system side
 1. Download and install [CapUnlocker](https://github.com/GrapheneCt/CapUnlocker) plugin
