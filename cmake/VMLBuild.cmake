@@ -134,10 +134,11 @@ function(compile_mono_dll_aot)
 endfunction()
 
 function(compile_mono_external_dll_aot)
+    set(options MSCORLIB)
     set(oneValueArgs ASSEMBLY TARGET LIBPATH)
     set(multiValueArgs REFERENCES)
 
-    cmake_parse_arguments(MONO "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(MONO "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
     set(DLL_PATH "${SFV_FOLDER}/Tools/MonoPSP2")
     if(MONO_LIBPATH)
@@ -147,8 +148,13 @@ function(compile_mono_external_dll_aot)
     set(REFERENCE_ARGS "")
     if(MONO_REFERENCES)
       foreach(REF ${MONO_REFERENCES})
-        list(APPEND REFERENCE_ARGS ${REF})
+        list(APPEND REFERENCE_ARGS ${CMAKE_BINARY_DIR}/${REF})
       endforeach()
+    endif()
+
+    # Strange hack, but it works
+    if(MONO_MSCORLIB)
+      set(MONO_PATH ${CURRENT_BINARY_DIR})
     endif()
 
     add_custom_command(

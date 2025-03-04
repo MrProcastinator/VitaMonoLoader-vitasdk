@@ -22,6 +22,7 @@ set (VML_MONO_PATCHES
 if (USE_MONO_COMPILER)
   compile_mono_external_dll_aot(
     ASSEMBLY mscorlib.dll
+    MSCORLIB
   )
   compile_mono_external_dll_aot(
     ASSEMBLY Mono.Posix.dll
