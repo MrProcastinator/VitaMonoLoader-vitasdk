@@ -15,6 +15,9 @@ if(USE_MONO_COMPILER)
   )
 endif()
 
+set(VML_FILES "")
+get_mono_files(VML_FILES)
+
 ## Build and link
 # Add all the files needed to compile here
 add_executable(${PROJECT_NAME}
@@ -51,12 +54,39 @@ NAME ${VITA_APP_NAME}
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/startup.png sce_sys/livearea/contents/startup.png
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/Sample1/bg.png sce_sys/livearea/contents/bg.png
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/template.xml sce_sys/livearea/contents/template.xml
+    # Mono files
+    ${CMAKE_BINARY_DIR}/Sample1.dll VML/Sample1.dll
+    ${VML_FILES}    
 )
 
 add_custom_target(VMLSample1_send_v3k
   COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/Mono.Posix.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/Mono.Posix.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/Mono.Security.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/Mono.Security.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/System.Configuration.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/System.Configuration.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/System.Core.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/System.Core.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/System.Security.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/System.Security.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/System.Xml.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/System.Xml.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/System.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/System.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${SFV_FOLDER}/Tools/MonoPSP2/mscorlib.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/mscorlib.dll
+  COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_BINARY_DIR}/Sample1.dll
-    ${VITA3K_PATH}/ux0/data/VML/Sample1.dll
+    ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/VML/Sample1.dll
   COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_BINARY_DIR}/sample1-eboot.bin
     ${VITA3K_PATH}/ux0/app/${VITA_TITLEID}/eboot.bin

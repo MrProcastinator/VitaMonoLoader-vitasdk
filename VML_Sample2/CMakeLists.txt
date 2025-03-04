@@ -16,6 +16,9 @@ if(USE_MONO_COMPILER)
   )
 endif()
 
+set(VML_FILES "")
+get_mono_files(VML_FILES)
+
 ## Build and link
 # Add all the files needed to compile here
 add_executable(${PROJECT_NAME}
@@ -57,6 +60,9 @@ NAME ${VITA_APP_NAME}
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/startup.png sce_sys/livearea/contents/startup.png
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/Sample2/bg.png sce_sys/livearea/contents/bg.png
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/template.xml sce_sys/livearea/contents/template.xml
+    # Mono files
+    ${CMAKE_BINARY_DIR}/Sample2.dll VML/Sample2.dll
+    ${VML_FILES}
 )
 
 add_custom_target(VMLSample2_send_v3k

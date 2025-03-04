@@ -9,7 +9,7 @@
 unsigned int sceLibcHeapSize = SCE_KERNEL_32MiB;
 
 #define VML_USE_OPT_PARAM
-#define ASSEMBLIES_DLL_FILE			"ux0:/data/VML/Sample1.dll"
+#define ASSEMBLIES_DLL_FILE			"app0:/VML/Sample1.dll"
 
 #define LIBFIOS2_PATH				"ur0:/data/VML/libfios2.suprx"
 #define LIBC_PATH					"ur0:/data/VML/libc.suprx"
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 		return 0;
 
 	fprintf(mono_log, "[VML_Sample1] Setting mono paths\n");
-	VMLSetPaths("ux0:data/VML", "ux0:data/VML/mono/2.0/machine.config");
+	VMLSetPaths("app0:VML", "app0:VML/mono/2.0/machine.config");
 	fprintf(mono_log, "[VML_Sample1] Initializing VML\n");
 #ifdef VML_USE_OPT_PARAM
 	VMLInitOptParam optParam;

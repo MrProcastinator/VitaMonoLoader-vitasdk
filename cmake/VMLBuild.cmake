@@ -4,6 +4,7 @@ include(CMakeParseArguments)
 set(SFV_FOLDER "" CACHE STRING "Unity Support for Vita installation folder")
 set(MONO_PATH "$ENV{MONO_PATH}" CACHE STRING "Unity Support for Vita Mono library path")
 set(MCS_PATH "" CACHE STRING "Mono 2 compatible library path")
+set(FOR_VITA3K OFF CACHE STRING "Build specifically for Vita3K")
 
 if("${SFV_FOLDER}" STREQUAL "")
   message(FATAL_ERROR "You must specify Unity Support for Vita installation folder by setting SFV_FOLDER")
@@ -15,6 +16,10 @@ endif()
 
 if("${MONO_PATH}" STREQUAL "")
   message(FATAL_ERROR "You must specify mono-xcompiler Mono folder by setting MONO_PATH")
+endif()
+
+if(NOT FOR_VITA3K)
+  add_definitions(-DUSE_CUSTOM_LIBC)
 endif()
 
 # Mono variables
