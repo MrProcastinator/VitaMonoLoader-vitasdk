@@ -238,6 +238,7 @@ This template provides a set of CMake variables to allow build customization acc
 | **CMake Variable**        | **Description**
 |:-------------------|:------------------------------------------
 |`SFV_FOLDER`         | Unity Support for Vita installation folder (mandatory)
+|`MCS_PATH`         | Mono 2 compatible library folder (mandatory)
 |`MONO_PATH` | Unity Support for Vita Mono library path (mandatory, should be inside Tools/MonoPSP2)
 |`MONO_LIB_DLL_PATH` | Path to the vitasdk include folder containing VML initialization headers (default: lib/mono)
 |`MONO_LIB_VML_PATH` | Path to the vitasdk lib folder containing VML binding libraries (default: lib)

@@ -3,9 +3,14 @@ include(CMakeParseArguments)
 # Must be provided when running
 set(SFV_FOLDER "" CACHE STRING "Unity Support for Vita installation folder")
 set(MONO_PATH "$ENV{MONO_PATH}" CACHE STRING "Unity Support for Vita Mono library path")
+set(MCS_PATH "" CACHE STRING "Mono 2 compatible library path")
 
 if("${SFV_FOLDER}" STREQUAL "")
   message(FATAL_ERROR "You must specify Unity Support for Vita installation folder by setting SFV_FOLDER")
+endif()
+
+if("${MCS_PATH}" STREQUAL "")
+  message(FATAL_ERROR "You must specify Mono 2 compatible library folder by setting MCS_PATH")
 endif()
 
 if("${MONO_PATH}" STREQUAL "")
