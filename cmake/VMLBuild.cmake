@@ -26,11 +26,22 @@ endif()
 set(MONO_INCLUDE_VML_PATH "include/VML" CACHE STRING "Mono VML initializers include path")
 set(MONO_LIB_DLL_PATH "lib/mono" CACHE STRING "Mono VML DLL path")
 set(MONO_LIB_VML_PATH "lib" CACHE STRING "Mono VML static library path")
+set(MONO_LIB_REFERENCES
+  System.dll
+  System.Core.dll
+  System.Xml.dll
+  mscorlib.dll
+  Mono.Security.dll
+  System.Configuration.dll
+  System.Security.dll
+  Mono.Posix.dll
+  CACHE STRING "Mono VML referenced dll files"
+)
 
 # VMLBuild script Version
 set(VMLBUILD_VERSION_MAX 0)
 set(VMLBUILD_VERSION_MIN 1)
-set(VMLBUILD_VERSION_PATCH 1)
+set(VMLBUILD_VERSION_PATCH 2)
 
 message("Using VMLBuild version ${VMLBUILD_VERSION_MAX}.${VMLBUILD_VERSION_MIN}.${VMLBUILD_VERSION_PATCH}")
 message("With Unity Support for Vita located at: '${SFV_FOLDER}'")
@@ -40,6 +51,19 @@ message("- VML Header installation path: ${MONO_INCLUDE_VML_PATH}")
 message("- Mono Library installation path: ${MONO_LIB_DLL_PATH}")
 message("- Static Library installation path: ${MONO_LIB_VML_PATH}")
 
+# Util functions
+function(get_mono_files REFLIST)
+    set(REFS "")
+    foreach(REF ${MONO_LIB_REFERENCES})
+      list(APPEND REFLIST "${SFV_FOLDER}/Tools/MonoPSP2/${REF}")
+      list(APPEND REFLIST "VML/${REF}")
+    endforeach()
+    list(APPEND REFLIST "${SFV_FOLDER}/machine.config")
+    list(APPEND REFLIST "VML/mono/2.0/machine.config")
+    set(${REFLIST} ${REFS} PARENT_SCOPE)
+endfunction()
+
+# Compilation functions
 function(compile_mono_assembly_aot)
     set(oneValueArgs ASSEMBLY CONFIG)
     set(multiValueArgs SOURCES REFERENCES FLAGS RESOURCES DEFINES)
@@ -111,8 +135,8 @@ function(compile_mono_assembly_aot)
         )
     endif()
 
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_ASSEMBLY}.dll.s")
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_ASSEMBLY}.dll")
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADDITIONAL_MAKE_CLEAN_FILES};${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.dll.s")
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADDITIONAL_MAKE_CLEAN_FILES};${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.dll")
 endfunction()
 
 function(compile_mono_dll_aot)
@@ -130,7 +154,7 @@ function(compile_mono_dll_aot)
         COMMENT "Generating AOT file for ${DLL_BASENAME}"
     )
 
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/${ADDITIONAL_MAKE_CLEAN_FILES};${MONO_DLL_FILE}.s")
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ADDITIONAL_MAKE_CLEAN_FILES};${CMAKE_BINARY_DIR}/${MONO_DLL_FILE}.s")
 endfunction()
 
 function(compile_mono_external_dll_aot)
@@ -153,8 +177,11 @@ function(compile_mono_external_dll_aot)
     endif()
 
     # Strange hack, but it works
+    set(FINAL_MONO_PATH "")
     if(MONO_MSCORLIB)
-      set(MONO_PATH ${CURRENT_BINARY_DIR})
+      set(FINAL_MONO_PATH ${CMAKE_BINARY_DIR})
+    else()
+      set(FINAL_MONO_PATH ${MONO_PATH})
     endif()
 
     add_custom_command(
@@ -169,7 +196,7 @@ function(compile_mono_external_dll_aot)
   
     add_custom_command(
       OUTPUT ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY}.s
-      COMMAND export "MONO_PATH=${MONO_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static ${MONO_ASSEMBLY}
+      COMMAND export "MONO_PATH=${FINAL_MONO_PATH}" && "WSLENV=MONO_PATH/p" "${SFV_FOLDER}/Tools/mono-xcompiler.exe" --aot=full,asmonly,nodebug,static ${MONO_ASSEMBLY}
       DEPENDS ${CMAKE_BINARY_DIR}/${MONO_ASSEMBLY} ${REFERENCE_ARGS}
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMENT "Generating AOT file for ${MONO_ASSEMBLY}"
