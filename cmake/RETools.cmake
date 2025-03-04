@@ -12,13 +12,14 @@ function(generate_stub_vitasdk)
     get_filename_component(RE_TOOLS_SUPRX_FILENAME ${RE_TOOLS_SUPRX} NAME)
     get_filename_component(RE_TOOLS_REFNAME ${RE_TOOLS_REFPATH} NAME)
 
+    # HACK: nids-extract.exe always returns 1, so we need to wrap it and execute it in python script
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${RE_TOOLS_LIBRARY}.yaml
         COMMAND ${CMAKE_COMMAND} -E copy
         ${RE_TOOLS_SUPRX}
         ${CMAKE_CURRENT_BINARY_DIR}/${RE_TOOLS_SUPRX_FILENAME}
         COMMAND ${RE_TOOL_VITA_UNMAKE_FSELF} ${RE_TOOLS_SUPRX_FILENAME}
-        COMMAND ${RE_TOOL_NIDS_EXTRACT} ${RE_TOOLS_SUPRX_FILENAME}.elf 3.60 > ${RE_TOOLS_LIBRARY}.yaml
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/nids-extract-wrapper.py ${RE_TOOL_NIDS_EXTRACT} ${RE_TOOLS_SUPRX_FILENAME}.elf 3.60 > ${RE_TOOLS_LIBRARY}.yaml
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Building initial stubs for ${RE_TOOLS_LIBRARY}"
     )
