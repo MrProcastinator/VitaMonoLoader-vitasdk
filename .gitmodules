@@ -1,0 +1,3 @@
+[submodule "cmake/VML"]
+	path = cmake/VML
+	url = https://github.com/MrProcastinator/VML-CMakeScripts.git
