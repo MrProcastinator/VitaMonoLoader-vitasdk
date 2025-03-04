@@ -30,7 +30,7 @@ In order to do the full compilation chain, either use an only Windows setup, or 
 8. When cloning the project, execute the following git commands after:
    ```sh
    git submodule init
-   git submodule update --init --recursive
+   git submodule update --init
    ```
 
 ### PSVita system side
