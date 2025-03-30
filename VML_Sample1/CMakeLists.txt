@@ -25,7 +25,10 @@ add_executable(${PROJECT_NAME}
   Sample1.dll.s
 )
 
-add_dependencies(${PROJECT_NAME} headers SceLibcMonoBridge ${MONO_STUBS_DEPENDENCIES})
+add_dependencies(${PROJECT_NAME} headers ${MONO_STUBS_DEPENDENCIES})
+if(USE_CUSTOM_LIBC)
+  add_dependencies(${PROJECT_NAME} headers SceLibcMonoBridge)
+endif()
 
 target_link_libraries(${PROJECT_NAME} VitaMonoLoader VMLCoreAssemblies)
 target_link_libraries(${PROJECT_NAME} c m z)
