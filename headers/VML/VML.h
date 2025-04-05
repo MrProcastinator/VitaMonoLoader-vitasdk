@@ -36,4 +36,6 @@ VML_EXPORT int VMLEnd();
 VML_EXPORT void VMLSetPaths(const char* assembly_path, const char* config_path);
 #endif
 
+VML_EXPORT int VMLSetCommandLineArgs(int argc, char** argv);
+
 #endif

@@ -245,3 +245,8 @@ VML_EXPORT int VMLEnd()
 	if(_VitaMonoLoader_log)
 		fclose(_VitaMonoLoader_log);
 }
+
+VML_EXPORT int VMLSetCommandLineArgs(int argc, char** argv)
+{
+	return mono_runtime_set_main_args(argv, argc);
+}

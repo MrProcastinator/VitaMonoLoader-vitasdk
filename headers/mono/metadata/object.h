@@ -302,8 +302,9 @@ MONO_API MONO_RT_EXTERNAL_ONLY int
 mono_runtime_exec_main	    (MonoMethod *method, MonoArray *args,
 			     MonoObject **exc);
 
+/* Inverted in PSVita */
 MONO_API MONO_RT_EXTERNAL_ONLY int
-mono_runtime_set_main_args  (int argc, char* argv[]);
+mono_runtime_set_main_args  (char* argv[], int argc);
 
 /* The following functions won't be available with mono was configured with remoting disabled. */
 /*#ifndef DISABLE_REMOTING */

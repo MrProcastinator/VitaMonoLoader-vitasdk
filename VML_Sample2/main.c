@@ -99,9 +99,11 @@ int main(int argc, char* argv[])
 	if (ret < 0)
 		return 0;
 
-	fprintf(mono_log, "[VML_Sample1] Setting mono paths\n");
+	fprintf(mono_log, "[VML_Sample2] Setting mono paths\n");
 	VMLSetPaths("app0:VML", "app0:VML/mono/2.0/machine.config");
-	fprintf(mono_log, "[VML_Sample1] Initializing VML\n");
+	fprintf(mono_log, "[VML_Sample2] Setting command line args\n");
+	VMLSetCommandLineArgs(argc, argv);
+	fprintf(mono_log, "[VML_Sample2] Initializing VML\n");
 #ifdef VML_USE_OPT_PARAM
 	VMLInitOptParam optParam;
 	optParam.stackSize = SCE_KERNEL_1MiB;
