@@ -11,7 +11,7 @@ In order to use this library, you must have:
 - A copy of any UnitySetup-Playstation-Vita-Support-for-Editor installer, supplied by Unity
 - [Mono 2.11.4 for Windows](https://download.mono-project.com/archive/2.11.4/windows-installer/index.html)
 - [Latest Mono release](https://www.mono-project.com/download/stable/) either for Windows or Linux
-- Latest Python 3 release
+- Latest Python 3 release, with the following python libraries: [yaml](https://pypi.org/project/PyYAML/)
 - Get vita-unmake-fself.exe and nids-extract.exe from [PSVita-RE-tools](https://github.com/MrProcastinator/PSVita-RE-tools.git)
 - Access to a Windows machine to run the Unity mono compiler
 
@@ -31,6 +31,12 @@ In order to do the full compilation chain, either use an only Windows setup, or 
    ```sh
    git submodule init
    git submodule update --init
+   ```
+9. Execute the following commands in your build folder:
+   ```sh
+   make
+   make headers # Install mono headers in /include
+   sudo make install
    ```
 
 ### PSVita system side
