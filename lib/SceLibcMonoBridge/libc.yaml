@@ -4,6 +4,7 @@ modules:
     nid: 0x72f8dba7
     libraries:
       SceLibc:
+        kernel: false
         nid: 0xbe43bb07
         functions:
           realloc: 0x6b54ba
@@ -357,6 +358,7 @@ modules:
           mbsrtowcs_s: 0xffdb6965
           fopen: 0xfffbe239
       SceLibm:
+        kernel: false
         nid: 0xcdae3c7d
         functions:
           ldexp: 0x56061b
@@ -561,6 +563,7 @@ modules:
           floorl: 0xfdfa4558
           _FExp: 0xff4eae04
       SceLibstdcxx:
+        kernel: false
         nid: 0xf7629240
         functions:
           _ZNKSt6_ctypeIwE10do_tolowerEPwPKw: 0x56443f

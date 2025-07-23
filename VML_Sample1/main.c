@@ -11,15 +11,53 @@ unsigned int sceLibcHeapSize = SCE_KERNEL_32MiB;
 #define VML_USE_OPT_PARAM
 #define ASSEMBLIES_DLL_FILE			"app0:/VML/Sample1.dll"
 
-#define LIBFIOS2_PATH				"ur0:/data/VML/libfios2.suprx"
-#define LIBC_PATH					"ur0:/data/VML/libc.suprx"
+#define LIBFIOS2_PATH				"vs0:/sys/external/libfios2.suprx"
+#define LIBC_PATH					"vs0:/sys/external/libc.suprx"
 #define SUPRX_MANAGER_PATH			"ur0:/data/VML/SUPRXManager.suprx"
 #define MONO_VITA_PATH				"ur0:/data/VML/mono-vita.suprx"
 #define PTHREAD_PATH				"ur0:/data/VML/pthread.suprx"
 
 extern void** mono_aot_module_Sample1_info;
 
+SceUID mono_core_log;
 FILE* mono_log;
+
+int tryLoadCoreModule(const char* module)
+{
+	int ret = sceKernelLoadStartModule(module, 0, NULL, 0, NULL, 0);;	
+
+	if (ret <= 0) {
+		sceClibDprintf(mono_core_log, "[VML_Sample1] sceKernelLoadStartModule() failed for %s with code: %8x\n", module, ret);
+	} else {
+		sceClibDprintf(mono_core_log, "[VML_Sample1] sceKernelLoadStartModule() ran successfully for %s!\n", module);
+	}
+
+	return ret;
+}
+
+int loadCoreModules()
+{
+	int ret = 0;
+	int cont = 1;
+
+	ret = sceSysmoduleLoadModule(SCE_SYSMODULE_NET);	
+	if (ret < 0) {
+		sceClibDprintf(mono_core_log, "[VML_Sample1] sceSysmoduleLoadModule(SCE_SYSMODULE_NET) failed with code: %8x\n", ret);
+	} else {
+		sceClibDprintf(mono_core_log, "[VML_Sample1] sceSysmoduleLoadModule(SCE_SYSMODULE_NET) ran successfully!\n");
+	}
+	cont &= (ret >= 0);
+
+#ifdef USE_CUSTOM_LIBC
+	ret = tryLoadCoreModule(LIBFIOS2_PATH);
+	cont &= (ret > 0);
+
+	ret = tryLoadCoreModule(LIBC_PATH);
+	cont &= (ret > 0);
+#endif
+
+	return cont;
+}
 
 int tryLoadModule(const char* module)
 {
@@ -38,22 +76,6 @@ int loadModules()
 {
 	int ret = 0;
 	int cont = 1;
-
-	ret = sceSysmoduleLoadModule(SCE_SYSMODULE_NET);	
-	if (ret < 0) {
-		fprintf(mono_log, "[VML_Sample1] sceSysmoduleLoadModule(SCE_SYSMODULE_NET) failed with code: %8x\n", ret);
-	} else {
-		fprintf(mono_log, "[VML_Sample1] sceSysmoduleLoadModule(SCE_SYSMODULE_NET) ran successfully!\n");
-	}
-	cont &= (ret >= 0);
-
-#ifdef USE_CUSTOM_LIBC
-	ret = tryLoadModule(LIBFIOS2_PATH);
-	cont &= (ret > 0);
-
-	ret = tryLoadModule(LIBC_PATH);
-	cont &= (ret > 0);
-#endif
 	
 	ret = tryLoadModule(SUPRX_MANAGER_PATH);
 	cont &= (ret > 0);
@@ -77,10 +99,20 @@ void rootEntry()
 
 int main(int argc, char* argv[])
 {
-
 	int ret = 0;
 
-	if(!(mono_log = fopen("ux0:data/mono_Sample1.log", "w+")))
+	if((mono_core_log = sceIoOpen("ux0:data/mono_Sample1.log", SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777)) < 0)
+	{
+		return 1;
+	}
+
+	ret = loadCoreModules();
+	if (!ret)
+		return 0;
+
+	sceIoClose(mono_core_log);
+
+	if(!(mono_log = fopen("ux0:data/mono_Sample1.log", "a+")))
 	{
 		return 1;
 	}
@@ -107,8 +139,7 @@ int main(int argc, char* argv[])
 	ret = VMLInitialize(rootEntry, NULL);
 #endif
 
-	if (ret < 0)
-		fprintf(mono_log, "[VML_Sample1] VMLInitialize(): 0x%08X", ret);
+	fprintf(mono_log, "[VML_Sample1] VMLInitialize(): 0x%08X", ret);
 
 	fclose(mono_log);
 
