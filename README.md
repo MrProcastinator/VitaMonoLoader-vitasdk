@@ -47,10 +47,8 @@ In order to do the full compilation chain, either use an only Windows setup, or 
     - pthread.suprx
     - SUPRXManager.suprx
    
-3. Copy the following files from the folder `sce_module` inside the Unity Support for Vita folder to `ur0:data/VML` (not needed to run on Vita3K):
-    
-    - libc.suprx
-    - libfios2.suprx
+~~3. Copy the following files from the folder `sce_module` inside the Unity Support for Vita folder to `ur0:data/VML` (not needed to run on Vita3K): libc.suprx, libfios2.suprx~~
+[This step is no longer needed](https://github.com/MrProcastinator/VitaMonoLoader-vitasdk/commit/40b43ee24536397f1fd8e95c5b925e6c2698660d)
 
 ## How to use
 
