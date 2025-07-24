@@ -28,12 +28,12 @@ add_executable(${PROJECT_NAME}
 
 add_dependencies(${PROJECT_NAME} headers ${MONO_STUBS_DEPENDENCIES})
 if(USE_CUSTOM_LIBC)
-  add_dependencies(${PROJECT_NAME} headers SceLibcMonoBridge)
+  add_dependencies(${PROJECT_NAME} SceLibcMonoBridge)
 endif()
 
 target_link_libraries(${PROJECT_NAME} VitaMonoLoader VMLCoreAssemblies)
 target_link_libraries(${PROJECT_NAME} VMLVita2D vita2d)
-target_link_libraries(${PROJECT_NAME} c m z)
+target_link_libraries(${PROJECT_NAME} m z)
 target_link_libraries(${PROJECT_NAME} mathneon)
 target_link_libraries(${PROJECT_NAME} SceLibDbg_stub SceLibKernel_stub SceAppMgr_stub SceAppUtil_stub SceCommonDialog_stub SceGxm_stub SceDisplay_stub SceSysmodule_stub)
 
@@ -64,6 +64,7 @@ NAME ${VITA_APP_NAME}
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/Sample2/bg.png sce_sys/livearea/contents/bg.png
     ${CMAKE_SOURCE_DIR}/vpk/sce_sys/template.xml sce_sys/livearea/contents/template.xml
     # Mono files
+    ${CMAKE_BINARY_DIR}/Vita2D.dll VML/Vita2D.dll
     ${CMAKE_BINARY_DIR}/Sample2.dll VML/Sample2.dll
     ${VML_FILES}
 )
