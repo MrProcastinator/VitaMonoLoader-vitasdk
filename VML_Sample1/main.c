@@ -61,7 +61,7 @@ int loadCoreModules()
 
 int tryLoadModule(const char* module)
 {
-	int ret = sceKernelLoadStartModule(module, 0, NULL, 0, NULL, 0);;	
+	int ret = sceKernelLoadStartModule(module, 0, NULL, 0, NULL, 0);
 
 	if (ret <= 0) {
 		fprintf(mono_log, "[VML_Sample1] sceKernelLoadStartModule() failed for %s with code: %8x\n", module, ret);
@@ -139,7 +139,8 @@ int main(int argc, char* argv[])
 	ret = VMLInitialize(rootEntry, NULL);
 #endif
 
-	fprintf(mono_log, "[VML_Sample1] VMLInitialize(): 0x%08X", ret);
+	if (ret < 0)
+		fprintf(mono_log, "[VML_Sample1] VMLInitialize(): 0x%08X\n", ret);
 
 	fclose(mono_log);
 
