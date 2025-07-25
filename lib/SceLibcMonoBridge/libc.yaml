@@ -357,6 +357,12 @@ modules:
           strdup: 0xff6f77c7
           mbsrtowcs_s: 0xffdb6965
           fopen: 0xfffbe239
+        variables:
+          _Ctype: 0x3ce6109d
+          _Stdout: 0x5d8c1282
+          _Stdin: 0x66b7406c
+          _Tolotab: 0xd662e07c
+          _Stderr: 0xddf9bb09
       SceLibm:
         kernel: false
         nid: 0xcdae3c7d
