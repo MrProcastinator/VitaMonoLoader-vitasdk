@@ -6,6 +6,8 @@
 
 #include "../headers/VML/VML.h"
 
+#define IS_LOADED(x) ((x) > 0 || (x) == SCE_KERNEL_ERROR_MODULEMGR_OLD_LIB)
+
 unsigned int sceLibcHeapSize = SCE_KERNEL_32MiB;
 
 #define VML_USE_OPT_PARAM
@@ -26,7 +28,7 @@ int tryLoadCoreModule(const char* module)
 {
 	int ret = sceKernelLoadStartModule(module, 0, NULL, 0, NULL, 0);;	
 
-	if (ret <= 0) {
+	if (!IS_LOADED(ret)) {
 		sceClibDprintf(mono_core_log, "[VML_Sample1] sceKernelLoadStartModule() failed for %s with code: %8x\n", module, ret);
 	} else {
 		sceClibDprintf(mono_core_log, "[VML_Sample1] sceKernelLoadStartModule() ran successfully for %s!\n", module);
@@ -50,10 +52,10 @@ int loadCoreModules()
 
 #ifdef USE_CUSTOM_LIBC
 	ret = tryLoadCoreModule(LIBFIOS2_PATH);
-	cont &= (ret > 0);
+	cont &= IS_LOADED(ret);
 
 	ret = tryLoadCoreModule(LIBC_PATH);
-	cont &= (ret > 0);
+	cont &= IS_LOADED(ret);
 #endif
 
 	return cont;
@@ -63,7 +65,7 @@ int tryLoadModule(const char* module)
 {
 	int ret = sceKernelLoadStartModule(module, 0, NULL, 0, NULL, 0);
 
-	if (ret <= 0) {
+	if (!IS_LOADED(ret)) {
 		fprintf(mono_log, "[VML_Sample1] sceKernelLoadStartModule() failed for %s with code: %8x\n", module, ret);
 	} else {
 		fprintf(mono_log, "[VML_Sample1] sceKernelLoadStartModule() ran successfully for %s!\n", module);
@@ -78,13 +80,13 @@ int loadModules()
 	int cont = 1;
 	
 	ret = tryLoadModule(SUPRX_MANAGER_PATH);
-	cont &= (ret > 0);
+	cont &= IS_LOADED(ret);
 	
 	ret = tryLoadModule(PTHREAD_PATH);
-	cont &= (ret > 0);
+	cont &= IS_LOADED(ret);
 
 	ret = tryLoadModule(MONO_VITA_PATH);
-	cont &= (ret > 0);
+	cont &= IS_LOADED(ret);
 
 	return cont;
 }
