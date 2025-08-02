@@ -6,10 +6,15 @@
 #include <mono/metadata/marshal.h>
 #include <mono/utils/strenc.h>
 
+#define mono_string_chars(s) ((gunichar2*)(s)->chars)
+#define mono_string_length(s) ((s)->length)
+
 #include <vitasdk.h>
 
 #include <ctype.h>
 #include <stdint.h>
+
+#include "../headers/VML/VML.h"
 
 /*
     Original: ves_icall_System_Text_Encoding_InternalCodePage
@@ -47,10 +52,64 @@ ves_icall_System_Environment_get_TickCount (void)
     return (gint32) (tick.tick & 0xffffffff);
 }
 
+/*
+    Original: ves_icall_System_Environment_GetEnvironmentVariable
+    Problem: This function uses a custom environment, which is not accesible through other means and isnot
+    interoperable with vitasdk
+    Solution: Use VML implementation of getenv to retrieve environment variables
+*/
+static MonoString *
+ves_icall_System_Environment_GetEnvironmentVariable (MonoString *name)
+{
+	const gchar *value;
+	gchar *utf8_name;
+
+	if (name == NULL)
+		return NULL;
+
+	utf8_name = mono_string_to_utf8 (name);
+	value = VMLGetEnv (utf8_name);
+
+	free (utf8_name);
+
+	if (value == 0)
+		return NULL;
+
+	return mono_string_new (mono_domain_get (), value);
+}
+
+/*
+    Original: ves_icall_System_Environment_InternalSetEnvironmentVariable
+    Problem: This function uses a custom environment, which is not accesible through other meansand not
+    interoperable with vitasdk
+    Solution: Use VML implementation of setenv to set environment variables
+*/
+static void
+ves_icall_System_Environment_InternalSetEnvironmentVariable (MonoString *name, MonoString *value)
+{
+	gchar *utf8_name, *utf8_value;
+
+	utf8_name = mono_string_to_utf8 (name);
+
+	if ((value == NULL) || (mono_string_length (value) == 0) || (mono_string_chars (value)[0] == 0)) {
+		VMLUnsetEnv (utf8_name);
+		free (utf8_name);
+		return;
+	}
+
+	utf8_value = mono_string_to_utf8 (value);
+	VMLSetEnv (utf8_name, utf8_value, TRUE);
+
+	free (utf8_name);
+	free (utf8_value);
+}
+
 
 void VMLICallApplyPatches()
 {
     SCE_DBG_LOG_TRACE("Patching System.Text.Encoding::InternalCodePage...");
     mono_add_internal_call("System.Text.Encoding::InternalCodePage", vml_icall_System_Text_Encoding_InternalCodePage);
     mono_add_internal_call("System.Environment::get_TickCount", ves_icall_System_Environment_get_TickCount);
+    mono_add_internal_call("System.Environment::internalGetEnvironmentVariable", ves_icall_System_Environment_GetEnvironmentVariable);
+    mono_add_internal_call("System.Environment::InternalSetEnvironmentVariable", ves_icall_System_Environment_InternalSetEnvironmentVariable);
 }

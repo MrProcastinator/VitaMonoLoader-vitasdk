@@ -68,6 +68,7 @@ endif ()
 
 add_library(${PROJECT_NAME} STATIC
   main.c
+  environment.c
   ${VML_MONO_PATCHES}
   mscorlib.dll.s
   Mono.Posix.dll.s

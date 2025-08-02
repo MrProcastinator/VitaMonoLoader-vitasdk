@@ -31,8 +31,8 @@ if(USE_CUSTOM_LIBC)
   add_dependencies(${PROJECT_NAME} SceLibcMonoBridge)
 endif()
 
-target_link_libraries(${PROJECT_NAME} VitaMonoLoader VMLCoreAssemblies)
 target_link_libraries(${PROJECT_NAME} VMLVita2D vita2d)
+target_link_libraries(${PROJECT_NAME} VitaMonoLoader VMLCoreAssemblies)
 target_link_libraries(${PROJECT_NAME} m z)
 target_link_libraries(${PROJECT_NAME} mathneon)
 target_link_libraries(${PROJECT_NAME} SceLibDbg_stub SceLibKernel_stub SceAppMgr_stub SceAppUtil_stub SceCommonDialog_stub SceGxm_stub SceDisplay_stub SceSysmodule_stub)
@@ -67,6 +67,22 @@ NAME ${VITA_APP_NAME}
     ${CMAKE_BINARY_DIR}/Vita2D.dll VML/Vita2D.dll
     ${CMAKE_BINARY_DIR}/Sample2.dll VML/Sample2.dll
     ${VML_FILES}
+)
+
+add_custom_target(VMLSample2_send_vcomp
+  COMMAND echo destroy | nc ${PSVITA_IP} 1338
+  COMMAND curl --ftp-method nocwd -T ${CMAKE_CURRENT_BINARY_DIR}/sample2-eboot.bin ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/Mono.Posix.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/Mono.Security.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/System.Configuration.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/System.Core.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/System.Security.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/System.Xml.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/System.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${SFV_FOLDER}/Tools/MonoPSP2/mscorlib.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND curl --ftp-method nocwd -T ${CMAKE_BINARY_DIR}/Sample2.dll ftp://${PSVITA_IP}:1337/ux0:/app/${VITA_TITLEID}/
+  COMMAND echo launch ${VITA_TITLEID} | nc ${PSVITA_IP} 1338
+  DEPENDS ${VITA_VPKNAME}.vpk-vpk ${CMAKE_BINARY_DIR}/Sample2.dll
 )
 
 add_custom_target(VMLSample2_send_v3k

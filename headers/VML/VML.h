@@ -38,4 +38,10 @@ VML_EXPORT void VMLSetPaths(const char* assembly_path, const char* config_path);
 
 VML_EXPORT int VMLSetCommandLineArgs(int argc, char** argv);
 
+VML_EXPORT char* VMLGetEnv(const char* name);
+
+VML_EXPORT int VMLSetEnv(const char *name, const char *value, int overwrite);
+
+VML_EXPORT int VMLUnsetEnv(const char *name);
+
 #endif
