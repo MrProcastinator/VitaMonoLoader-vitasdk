@@ -109,7 +109,10 @@ void VMLICallApplyPatches()
 {
     SCE_DBG_LOG_TRACE("Patching System.Text.Encoding::InternalCodePage...");
     mono_add_internal_call("System.Text.Encoding::InternalCodePage", vml_icall_System_Text_Encoding_InternalCodePage);
+    SCE_DBG_LOG_TRACE("Patching System.Environment::get_TickCount...");
     mono_add_internal_call("System.Environment::get_TickCount", ves_icall_System_Environment_get_TickCount);
+    SCE_DBG_LOG_TRACE("Patching System.Environment::internalGetEnvironmentVariable...");
     mono_add_internal_call("System.Environment::internalGetEnvironmentVariable", ves_icall_System_Environment_GetEnvironmentVariable);
+    SCE_DBG_LOG_TRACE("Patching System.Environment::InternalSetEnvironmentVariable...");
     mono_add_internal_call("System.Environment::InternalSetEnvironmentVariable", ves_icall_System_Environment_InternalSetEnvironmentVariable);
 }
