@@ -16,6 +16,8 @@
 
 #include "../headers/VML/VML.h"
 
+void sceLibcMonoBridgeFree(void *ptr);
+
 /*
     Original: ves_icall_System_Text_Encoding_InternalCodePage
     Problem: Due to not resolving exports _CType and _Tolotab, the operation results in a loop with causes several read exceptions
@@ -24,18 +26,8 @@
 static MonoString*
 vml_icall_System_Text_Encoding_InternalCodePage(gint32 *int_code_page)
 {
-    const char *cset;
-	const char *p;
-	char *c;
-	char *codepage = NULL;
-	int code;
-	int i;
-
     *int_code_page = -1;
-
-    cset = "utf_8";
-
-    return mono_string_new (mono_domain_get (), cset);
+    return mono_string_new (mono_domain_get (), "utf_8");
 }
 
 /*
@@ -69,8 +61,7 @@ ves_icall_System_Environment_GetEnvironmentVariable (MonoString *name)
 
 	utf8_name = mono_string_to_utf8 (name);
 	value = VMLGetEnv (utf8_name);
-
-	free (utf8_name);
+	sceLibcMonoBridgeFree (utf8_name);
 
 	if (value == 0)
 		return NULL;
@@ -93,15 +84,15 @@ ves_icall_System_Environment_InternalSetEnvironmentVariable (MonoString *name, M
 
 	if ((value == NULL) || (mono_string_length (value) == 0) || (mono_string_chars (value)[0] == 0)) {
 		VMLUnsetEnv (utf8_name);
-		free (utf8_name);
+		sceLibcMonoBridgeFree (utf8_name);
 		return;
 	}
 
 	utf8_value = mono_string_to_utf8 (value);
 	VMLSetEnv (utf8_name, utf8_value, TRUE);
 
-	free (utf8_name);
-	free (utf8_value);
+	sceLibcMonoBridgeFree (utf8_name);
+	sceLibcMonoBridgeFree (utf8_value);
 }
 
 
